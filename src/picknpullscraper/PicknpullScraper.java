@@ -50,7 +50,7 @@ public class PicknpullScraper {
                 });
         
         println("--------------------------------------PARTS--------------------------------------");
-        System.out.print("Gathering part information...");
+        System.out.print("Gathering information...");
         //work out part information and add parts to parts list
         partNumbers.add("11361432532");
         partNumbers.add("61318363668");
