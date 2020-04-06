@@ -1,3 +1,5 @@
+//Copyright © 2020 - Rudy de Lorenzo
+
 package picknpullscraper;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ public class Car {
     public int locationId;
     public String locationName;
     public int row;
+    public String carURL;
     public String postCode;
     public Date dateAdded;
     public int year;
@@ -62,6 +65,7 @@ public class Car {
         model = data.get("Model");
         generation = solveGeneration();
         vin = data.get("VIN");
+        carURL = "https://www.picknpull.com/vehicle_details.aspx?VIN=" + vin;
         imageURL = data.get("ThumbNail");
     }
     
@@ -121,7 +125,6 @@ public class Car {
     }
     
     private void deepDive() throws IOException {
-        String carURL = "https://www.picknpull.com/vehicle_details.aspx?VIN=" + vin;
         Document page = Jsoup.connect(carURL).get();
         
         Element dataTable = page.getElementById("ctl00_ctl00_MasterHolder_MainContent_infoTextBlock");

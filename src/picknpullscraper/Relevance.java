@@ -1,3 +1,5 @@
+//Copyright © 2020 - Rudy de Lorenzo
+
 package picknpullscraper;
 
 public class Relevance {

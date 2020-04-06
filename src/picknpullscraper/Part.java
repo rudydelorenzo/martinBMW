@@ -1,3 +1,5 @@
+//Copyright © 2020 - Rudy de Lorenzo
+
 package picknpullscraper;
 
 import java.io.IOException;
@@ -27,9 +29,9 @@ public class Part {
             
             partName = content.getElementsByTag("h2").first().text();
             try {
-                price = Float.parseFloat(content.select("dl dd").last().text().replace("$", ""));
+                price = Float.parseFloat(content.select(">dl dd").last().text().replace("$", ""));
             } catch (NumberFormatException e) {
-                println("Number format exception, no price available for PN:" + partNumber);
+                println("Number Format Exception, no price available for PN:" + partNumber);
             }
             
             Elements results = content.select("div.partSearchResults ul li a");

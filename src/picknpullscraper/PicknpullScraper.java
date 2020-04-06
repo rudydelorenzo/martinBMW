@@ -1,3 +1,5 @@
+//Copyright © 2020 - Rudy de Lorenzo
+
 package picknpullscraper;
 
 import java.io.IOException;
@@ -47,6 +49,8 @@ public class PicknpullScraper {
                     }
                 });
         
+        println("--------------------------------------PARTS--------------------------------------");
+        System.out.print("Gathering part information...");
         //work out part information and add parts to parts list
         partNumbers.add("11361432532");
         partNumbers.add("61318363668");
@@ -58,13 +62,12 @@ public class PicknpullScraper {
         partNumbers.add("51458159735");
         partNumbers.add("51168250436");
         partNumbers.add("11427512300");
-        for (String pn : partNumbers) {
-            parts.add(new Part(pn));
-        }
-        println("---------------------------------------------PARTS---------------------------------------------");
-        for (Part p : parts) System.out.printf("Part Number: %s \t%-50s\t$%.2f%n", p.partNumber, p.partName, p.price);
+        for (String pn : partNumbers) parts.add(new Part(pn));
         
+        System.out.print("\b");
+        for (Part p : parts) System.out.printf("Part Number: %s \t%-37s\t$%7.2f%n", p.partNumber, p.partName, p.price);
         
+        //begin pick n pull data collection
         String url = "https://www.picknpull.com/check_inventory.aspx?Zip=T5K2K3&Make=90&Model=&Year=&Distance=500&Lat=53.537295&Lon=-113.498602";
         
         int delay = 0;   // delay for 0 sec.
@@ -75,7 +78,7 @@ public class PicknpullScraper {
             @Override
             public void run() {
                 //code that gets executed repeatedly goes here
-                println("\n--------------------------------------------NEW RUN--------------------------------------------");
+                println("\n-------------------------------------NEW RUN-------------------------------------");
                 
                 //create list of old IDs to compare and see if new cars appeared
                 oldIds = new ArrayList<>();
@@ -87,8 +90,8 @@ public class PicknpullScraper {
 
                 //cars list is made, now everything is done locally (except for deepdives)
                 ArrayList<Car> newCars = new ArrayList<>();
-                println("Starting in-depth scan of new vehicles...");
-                String progress = "Working.";
+                System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH ANALYSIS...%n", new Date());
+                String progress = "Working ";
                 System.out.print(progress);
                 for (Car c : cars) {
                     //System.out.printf("%s: %d %s %s, VIN:%s \tAdded on: %tB %<te, %<tY%n", c.generation, c.year, c.make, c.model, c.vin, c.date);
@@ -105,7 +108,7 @@ public class PicknpullScraper {
                 println("");
                 if (!newCars.isEmpty()) {
                     //there are new cars! time to sort by relevance and email
-                    System.out.printf("There are %d new cars!%n", newCars.size());
+                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n", new Date(), newCars.size());
                     newCars.sort(new PartsPresentComparator());
                     newCars.sort(new DistanceComparator());
                     newCars.sort(new RelevanceComparator());
@@ -115,7 +118,7 @@ public class PicknpullScraper {
                     sendEmail(newCars, "rdelorenzo5@gmail.com");
                     
                 } else {
-                    println("There are no new cars!");
+                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n", new Date());
                 }
             }
         }, delay*1000, period*1000);
@@ -228,7 +231,7 @@ public class PicknpullScraper {
                             + "<td>%tB %<te, %<tY%n</td>"
                             + "</tr>\n", c.year, (c.model + " (" + c.generation + ")"), 
                             (currentLevel != Relevance.NONE ? "<td>" + c.trim + "</td>":""), 
-                            c.vin, (currentLevel == Relevance.PARTIAL ? ("<td>Car may contain:" + c.getPartsListHTML() + "</td>"):""), 
+                            String.format("<a href=\"%s\">%s</a>", c.carURL, c.vin), (currentLevel == Relevance.PARTIAL ? ("<td>Car may contain:" + c.getPartsListHTML() + "</td>"):""), 
                             c.locationName, c.row, c.dateAdded);
                 }
                 table += "</table>\n</body>\n</html>";
