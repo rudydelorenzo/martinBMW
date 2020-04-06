@@ -10,6 +10,14 @@
 <project name="picknpullScraper" default="default" basedir=".">
     <description>Builds, tests, and runs the project picknpullScraper.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    <target name="-post-jar">
+        <setpermissions mode="755">
+            <file file="${dist.dir}/picknpullScraper.jar"/>
+        </setpermissions>
+        <zip destfile="RELEASES/martin.zip" basedir="${dist.dir}"/>
+    </target>
+    
     <!--
 
     There exist several targets which are by default empty and which can be 

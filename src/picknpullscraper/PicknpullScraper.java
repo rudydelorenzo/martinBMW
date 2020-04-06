@@ -64,7 +64,7 @@ public class PicknpullScraper {
         partNumbers.add("11427512300");
         for (String pn : partNumbers) parts.add(new Part(pn));
         
-        System.out.print("\b");
+        System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
         for (Part p : parts) System.out.printf("Part Number: %s \t%-37s\t$%7.2f%n", p.partNumber, p.partName, p.price);
         
         //begin pick n pull data collection
