@@ -185,7 +185,13 @@ public class PicknpullScraper {
             //println(lhm);
             
             //creating email text
-            String emailText = "<h1>ARRIVALS</h1>\n";
+            String emailText = "<html>\n" +
+                "<head>\n" +
+                "<style>\n" +
+                "table, th, td {border-collapse: collapse; border: 1px solid black;}\n" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body><h1>ARRIVALS</h1>\n";
             //make sections (headers + tables)
             for (Map.Entry<Integer, ArrayList<Car>> entry : lhm.entrySet()) {
                 //make header
@@ -196,7 +202,7 @@ public class PicknpullScraper {
                 else if (currentLevel == Relevance.NONE) sectionHeader = "OTHER";
                 sectionHeader = String.format("<h2>%s</h2>\n", sectionHeader);
                 
-                String table = "<table>\n";
+                String table = "<table cellpadding=\"10\">\n";
                 //make header row
                 table += String.format("<tr>"
                         + "<th>Year</th>"
@@ -225,7 +231,7 @@ public class PicknpullScraper {
                             c.vin, (currentLevel == Relevance.PARTIAL ? ("<td>Car may contain:" + c.getPartsListHTML() + "</td>"):""), 
                             c.locationName, c.row, c.dateAdded);
                 }
-                table += "</table>\n";
+                table += "</table>\n</body>\n</html>";
                 
                 emailText += sectionHeader;
                 emailText += table;

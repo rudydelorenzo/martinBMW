@@ -46,7 +46,7 @@ public class Part {
             
         } catch (IOException e) {
             System.out.printf("Couldn't connect to RealOEM to gather information"
-                    + " on part PN:%s", partNumber);
+                    + " on part PN:%s%n", partNumber);
         }
         
     }
