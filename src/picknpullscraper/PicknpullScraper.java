@@ -57,6 +57,7 @@ public class PicknpullScraper {
         partNumbers.add("61318368934");
         partNumbers.add("51458159735");
         partNumbers.add("51168250436");
+        partNumbers.add("11427512300");
         for (String pn : partNumbers) {
             parts.add(new Part(pn));
         }
