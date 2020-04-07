@@ -77,7 +77,8 @@ public class Car {
             else if (1995 < year && year < 2004) gen = "E39";
             else if (2003 < year && year < 2011) gen = "E60";
         } else if (model.equalsIgnoreCase("3-Series")) {
-            if (1997 < year && year < 2006) gen = "E46";
+            if (1991 < year && year < 1998) gen = "E36";
+            else if (1997 < year && year < 2006) gen = "E46";
         } else if (model.equalsIgnoreCase("7-Series")) {
             if (1993 < year && year < 2002) gen = "E38";
             else if (2001 < year && year < 2006) gen = "E65";
