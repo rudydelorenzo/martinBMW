@@ -25,7 +25,7 @@ import org.jsoup.select.Elements;
 
 public class PicknpullScraper {
     
-    private static final String VERSION = "1.0.4";
+    private static final String VERSION = "1.0.5";
     
     public static ArrayList<Car> cars = new ArrayList<>();
     public static ArrayList<Integer> oldIds = new ArrayList<>();
@@ -61,8 +61,7 @@ public class PicknpullScraper {
         System.out.print("Gathering information...");
         //work out part information and add parts to parts list
         
-        getPartNumbers("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/"
-                + "raw/0d40aa8671847b707b9468ba69a6ffd33bd011bc/partslist.tsv");
+        getPartNumbers("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/raw");
         
         for (String pn : partNumbers) parts.add(new Part(pn));
         
@@ -92,7 +91,7 @@ public class PicknpullScraper {
 
                 //cars list is made, now everything is done locally (except for deepdives)
                 ArrayList<Car> newCars = new ArrayList<>();
-                System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH ANALYSIS...%n", new Date());
+                System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH SCAN%n", new Date());
                 String progress = "Working ";
                 System.out.print(progress);
                 for (Car c : cars) {
