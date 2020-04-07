@@ -1,9 +1,13 @@
-//Copyright © 2020 - Rudy de Lorenzo
+//Copyright © 2020 - Rodrigo de Lorenzo
 
 package picknpullscraper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import javax.mail.Message;
@@ -21,6 +25,8 @@ import org.jsoup.select.Elements;
 
 public class PicknpullScraper {
     
+    private static final String VERSION = "1.0.4";
+    
     public static ArrayList<Car> cars = new ArrayList<>();
     public static ArrayList<Integer> oldIds = new ArrayList<>();
     public static ArrayList<String> partNumbers = new ArrayList<>();
@@ -35,6 +41,8 @@ public class PicknpullScraper {
     public static Session session;
     
     public static void main(String[] args) throws IOException {
+        //print out program info
+        System.out.printf("Martin %s (BMW Edition) | Copyright 2020, Rodrigo de Lorenzo%n%n", VERSION);
         //initialize email
         Properties prop = new Properties();
         prop.put("mail.smtp.host", "smtp.gmail.com");
@@ -49,26 +57,21 @@ public class PicknpullScraper {
                     }
                 });
         
-        println("--------------------------------------PARTS--------------------------------------");
+        println("--------------------------------------PARTS-------------------------------------");
         System.out.print("Gathering information...");
         //work out part information and add parts to parts list
-        partNumbers.add("11361432532");
-        partNumbers.add("61318363668");
-        partNumbers.add("64116915812");
-        partNumbers.add("51478159495");
-        partNumbers.add("51168196963");
-        partNumbers.add("51438208325");
-        partNumbers.add("61318368934");
-        partNumbers.add("51458159735");
-        partNumbers.add("51168250436");
-        partNumbers.add("11427512300");
+        
+        getPartNumbers("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/"
+                + "raw/0d40aa8671847b707b9468ba69a6ffd33bd011bc/partslist.tsv");
+        
         for (String pn : partNumbers) parts.add(new Part(pn));
         
         System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
-        for (Part p : parts) System.out.printf("Part Number: %s \t%-37s\t$%7.2f%n", p.partNumber, p.partName, p.price);
+        for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
         
         //begin pick n pull data collection
         String url = "https://www.picknpull.com/check_inventory.aspx?Zip=T5K2K3&Make=90&Model=&Year=&Distance=500&Lat=53.537295&Lon=-113.498602";
+        println("\n------------------------------------SEARCH--------------------------------------");
         
         int delay = 0;   // delay for 0 sec.
         int period = 600;  // repeat every 10 min (600sec).
@@ -78,7 +81,6 @@ public class PicknpullScraper {
             @Override
             public void run() {
                 //code that gets executed repeatedly goes here
-                println("\n-------------------------------------NEW RUN-------------------------------------");
                 
                 //create list of old IDs to compare and see if new cars appeared
                 oldIds = new ArrayList<>();
@@ -108,7 +110,7 @@ public class PicknpullScraper {
                 println("");
                 if (!newCars.isEmpty()) {
                     //there are new cars! time to sort by relevance and email
-                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n", new Date(), newCars.size());
+                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), newCars.size());
                     newCars.sort(new PartsPresentComparator());
                     newCars.sort(new DistanceComparator());
                     newCars.sort(new RelevanceComparator());
@@ -118,7 +120,7 @@ public class PicknpullScraper {
                     sendEmail(newCars, "rdelorenzo5@gmail.com");
                     
                 } else {
-                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n", new Date());
+                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n%n", new Date());
                 }
             }
         }, delay*1000, period*1000);
@@ -254,6 +256,22 @@ public class PicknpullScraper {
             println("NoClassDef while trying to send email, probably an error with activation.jar");
             return false;
         }
+    }
+    
+    public static void getPartNumbers(String in) {
+        try {
+            URL url = new URL(in);
+            BufferedReader read = new BufferedReader(
+                new InputStreamReader(url.openStream()));
+            String i;
+            while ((i = read.readLine()) != null)
+                partNumbers.add(i.split("\t")[0]);
+            read.close();
+        } catch (IOException e) {
+            println("Error reading parts file... Exiting");
+            System.exit(10);
+        }
+        
     }
 
     public static void println(Object toPrint) {
