@@ -25,7 +25,7 @@ import org.jsoup.select.Elements;
 
 public class PicknpullScraper {
     
-    private static final String VERSION = "1.0.6";
+    private static final String VERSION = "1.0.7";
     
     public static ArrayList<Car> cars = new ArrayList<>();
     public static ArrayList<Integer> oldIds = new ArrayList<>();
@@ -69,7 +69,9 @@ public class PicknpullScraper {
         for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
         
         //begin pick n pull data collection
-        String url = "https://www.picknpull.com/check_inventory.aspx?Zip=T5K2K3&Make=90&Model=&Year=&Distance=500&Lat=53.537295&Lon=-113.498602";
+        String zip = "T5K2K3";
+        int distance = 500;
+        String url = String.format("https://www.picknpull.com/check_inventory.aspx?Zip=%s&Make=90&Model=&Year=&Distance=%d", zip, distance);
         println("\n------------------------------------SEARCH--------------------------------------");
         
         int delay = 0;   // delay for 0 sec.

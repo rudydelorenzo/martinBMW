@@ -31,7 +31,7 @@ public class Part {
             try {
                 price = Float.parseFloat(content.select(">dl dd").last().text().replace("$", ""));
             } catch (NumberFormatException e) {
-                println("Number Format Exception, no price available for PN:" + partNumber);
+                //println("Number Format Exception, no price available for PN:" + partNumber);
             }
             
             Elements results = content.select("div.partSearchResults ul li a");
