@@ -27,6 +27,8 @@ public class martinBMW {
     
     private static final String VERSION = "1.0.7";
     
+    public static String URL;
+    
     public static ArrayList<Car> cars = new ArrayList<>();
     public static ArrayList<Integer> oldIds = new ArrayList<>();
     public static ArrayList<String> partNumbers = new ArrayList<>();
@@ -36,27 +38,42 @@ public class martinBMW {
     //email variables
     //email stuff
     public static String from = "picknpullnotify@gmail.com";
-    public static final String username = "picknpullnotify@gmail.com";
-    public static final String password = "picknpullrocks";
+    public static final String USERNAME = "picknpullnotify@gmail.com";
+    public static final String PASSWORD = "picknpullrocks";
     public static Session session;
     
     public static void main(String[] args) throws IOException {
         //print out program info
         System.out.printf("Martin %s (BMW Edition) | Copyright 2020, Rodrigo de Lorenzo%n%n", VERSION);
-        //initialize email
-        Properties prop = new Properties();
-        prop.put("mail.smtp.host", "smtp.gmail.com");
-        prop.put("mail.smtp.port", "587");
-        prop.put("mail.smtp.auth", "true");
-        prop.put("mail.smtp.starttls.enable", "true"); //TLS
         
-        session = Session.getInstance(prop,
-                new javax.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
-                    }
-                });
+        String mode;
+        try {
+            mode = args[0];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            mode = "-h";
+        }
+        mode = "-m";
+        String helpMessage = "";
         
+        //launch appropriate tool
+        switch (mode) {
+            case "-h":
+                System.out.println(helpMessage);
+                break;
+            case "-m":
+                monitorMode.monitor();
+                break;
+            case "-s":
+                break;
+            default:
+                System.out.printf("Flag %s not recognized. For a list of accepted"
+                        + " flags, launch martin with the -h flag.%n", mode);
+                break;
+        }
+        
+    }
+    
+    public static void parts() {
         println("--------------------------------------PARTS-------------------------------------");
         System.out.print("Gathering information...");
         //work out part information and add parts to parts list
@@ -67,64 +84,51 @@ public class martinBMW {
         
         System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
         for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
-        
-        //begin pick n pull data collection
-        String zip = "T5K2K3";
-        int distance = 500;
-        String url = String.format("https://www.picknpull.com/check_inventory.aspx?Zip=%s&Make=90&Model=&Year=&Distance=%d", zip, distance);
-        println("\n------------------------------------SEARCH--------------------------------------");
-        
-        int delay = 0;   // delay for 0 sec.
-        int period = 600;  // repeat every 10 min (600sec).
-        Timer timer = new Timer();
-
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                //code that gets executed repeatedly goes here
+    }
+    
+    public static void findNewCars(String url) {
+        //code that gets executed repeatedly goes here
                 
-                //create list of old IDs to compare and see if new cars appeared
-                oldIds = new ArrayList<>();
-                for (Car c : cars) {
-                    oldIds.add(c.id);
-                }
+        //create list of old IDs to compare and see if new cars appeared
+        oldIds = new ArrayList<>();
+        for (Car c : cars) {
+            oldIds.add(c.id);
+        }
 
-                cars = scrape(url);
+        cars = scrape(url);
 
-                //cars list is made, now everything is done locally (except for deepdives)
-                ArrayList<Car> newCars = new ArrayList<>();
-                System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH SCAN%n", new Date());
-                String progress = "Working ";
-                System.out.print(progress);
-                for (Car c : cars) {
-                    //System.out.printf("%s: %d %s %s, VIN:%s \tAdded on: %tB %<te, %<tY%n", c.generation, c.year, c.make, c.model, c.vin, c.date);
-                    for (int i =0 ; i < progress.length(); i++) System.out.print("\b");
-                    progress += ".";
-                    System.out.print(progress);
-                    if (!oldIds.contains(c.id)) {
-                        //car is new
-                        
-                        c.getRelevance();
-                        newCars.add(c);
-                    }
-                }
-                println("");
-                if (!newCars.isEmpty()) {
-                    //there are new cars! time to sort by relevance and email
-                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), newCars.size());
-                    newCars.sort(new PartsPresentComparator());
-                    newCars.sort(new DistanceComparator());
-                    newCars.sort(new RelevanceComparator());
-                    //cars are now sorted (Relevance, distance, parts in common)
-                    
-                    //email time
-                    sendEmail(newCars, "rdelorenzo5@gmail.com");
-                    
-                } else {
-                    System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n%n", new Date());
-                }
+        //cars list is made, now everything is done locally (except for deepdives)
+        ArrayList<Car> newCars = new ArrayList<>();
+        System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH SCAN%n", new Date());
+        String progress = "Working ";
+        System.out.print(progress);
+        for (Car c : cars) {
+            //System.out.printf("%s: %d %s %s, VIN:%s \tAdded on: %tB %<te, %<tY%n", c.generation, c.year, c.make, c.model, c.vin, c.date);
+            for (int i =0 ; i < progress.length(); i++) System.out.print("\b");
+            progress += ".";
+            System.out.print(progress);
+            if (!oldIds.contains(c.id)) {
+                //car is new
+
+                c.getRelevance();
+                newCars.add(c);
             }
-        }, delay*1000, period*1000);
+        }
+        println("");
+        if (!newCars.isEmpty()) {
+            //there are new cars! time to sort by relevance and email
+            System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), newCars.size());
+            newCars.sort(new PartsPresentComparator());
+            newCars.sort(new DistanceComparator());
+            newCars.sort(new RelevanceComparator());
+            //cars are now sorted (Relevance, distance, parts in common)
+
+            //email time
+            sendEmail(newCars, "rdelorenzo5@gmail.com");
+
+        } else {
+            System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n%n", new Date());
+        }
     }
     
     public static ArrayList<Car> scrape(String url) {
@@ -169,17 +173,8 @@ public class martinBMW {
         
     }
     
-    public static boolean sendEmail(ArrayList<Car> cars, String email) {
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from, "Martin"));
-            message.addRecipient(
-                    Message.RecipientType.TO,
-                    InternetAddress.parse(email)[0]
-                );
-            message.setSubject("New Arrivals at Pick-n-Pull! (" + cars.size() + ")");
-            
-            //divide list into relevance categories
+    public static String getEmailBody(ArrayList<Car> cars) {
+        //divide list into relevance categories
             LinkedHashMap<Integer, ArrayList<Car>> lhm = new LinkedHashMap<>();
             for (Car c : cars) {
                 ArrayList<Car> relevanceList = lhm.get(c.getRelevance());
@@ -243,10 +238,20 @@ public class martinBMW {
                 emailText += table;
             }
             
+            return emailText;
+    }
+    
+    public static boolean sendEmail(ArrayList<Car> cars, String email) {
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(from, "Martin"));
+            message.addRecipient(
+                    Message.RecipientType.TO,
+                    InternetAddress.parse(email)[0]
+                );
+            message.setSubject("New Arrivals at Pick-n-Pull! (" + cars.size() + ")");
             
-            //done creating email content
-            
-            message.setContent(emailText, "text/html; charset=utf-8");
+            message.setContent(getEmailBody(cars), "text/html; charset=utf-8");
 
             Transport.send(message);
             return true;

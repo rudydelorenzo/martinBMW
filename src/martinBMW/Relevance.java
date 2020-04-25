@@ -1,6 +1,6 @@
 //Copyright © 2020 - Rudy de Lorenzo
 
-package picknpullscraper;
+package martinBMW;
 
 public class Relevance {
     
