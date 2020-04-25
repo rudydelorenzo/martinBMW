@@ -53,7 +53,11 @@ public class martinBMW {
             mode = "-h";
         }
 
-        String helpMessage = "";
+        String helpMessage = "Welcome to Martin for BMW!\n"
+                + "Here are the supported flags:\n"
+                + "\t\"-m\"\tlaunches martin in monitoring mode (to find new cars).\n"
+                + "\t\"-s\"\tlaunches martin's query server, to accept search requests.\n"
+                + "\t\"-h\"\tshows supported flags.\n";
         
         //launch appropriate tool
         switch (mode) {
