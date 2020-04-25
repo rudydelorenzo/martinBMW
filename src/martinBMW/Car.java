@@ -11,7 +11,6 @@ import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import static martinBMW.martinBMW.parts;
 
 public class Car {
     
@@ -99,7 +98,7 @@ public class Car {
         return gen;
     }
     
-    public int getRelevance() {
+    public int calculateRelevance(ArrayList<Part> parts) {
         if (relevance == -1) {
             //if we enter here, relevance hasn't been calculated yet
             relevance = Relevance.NONE;
@@ -122,6 +121,10 @@ public class Car {
                 }
             }
         }
+        return relevance;
+    }
+    
+    public int getRelevance() {
         return relevance;
     }
     

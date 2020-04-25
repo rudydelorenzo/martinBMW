@@ -12,9 +12,6 @@
     <import file="nbproject/build-impl.xml"/>
     
     <target name="-post-jar">
-        <setpermissions mode="755">
-            <file file="${dist.dir}/picknpullScraper.jar"/>
-        </setpermissions>
         <zip destfile="RELEASES/martin.zip" basedir="${dist.dir}"/>
     </target>
     

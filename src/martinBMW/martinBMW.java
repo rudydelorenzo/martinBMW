@@ -31,8 +31,6 @@ public class martinBMW {
     
     public static ArrayList<Car> cars = new ArrayList<>();
     public static ArrayList<Integer> oldIds = new ArrayList<>();
-    public static ArrayList<String> partNumbers = new ArrayList<>();
-    public static ArrayList<Part> parts = new ArrayList<>();
     public static LinkedHashMap<String, Float> distances = new LinkedHashMap<>(); //distances by postal code
     
     //email variables
@@ -52,11 +50,11 @@ public class martinBMW {
         } catch (ArrayIndexOutOfBoundsException e) {
             mode = "-h";
         }
-
+        mode = "-m";
         String helpMessage = "Welcome to Martin for BMW!\n"
                 + "Here are the supported flags:\n"
                 + "\t\"-m\"\tlaunches martin in monitoring mode (to find new cars).\n"
-                + "\t\"-s\"\tlaunches martin's query server, to accept search requests.\n"
+                + "\t\"-s\"\tlaunches marin in single-search mode.\n"
                 + "\t\"-h\"\tshows supported flags.\n";
         
         //launch appropriate tool
@@ -68,6 +66,7 @@ public class martinBMW {
                 monitorMode.monitor();
                 break;
             case "-s":
+                //martinServer.startServer();
                 break;
             default:
                 System.out.printf("Flag %s not recognized. For a list of accepted"
@@ -77,20 +76,23 @@ public class martinBMW {
         
     }
     
-    public static void parts() {
+    public static ArrayList<Part> getParts() {
         println("--------------------------------------PARTS-------------------------------------");
         System.out.print("Gathering information...");
         //work out part information and add parts to parts list
         
-        getPartNumbers("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/raw");
+        ArrayList<String> partNumbers = getPartNumbers("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/raw");
         
+        ArrayList<Part> parts = new ArrayList<>();
         for (String pn : partNumbers) parts.add(new Part(pn));
         
         System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
         for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
+        
+        return parts;
     }
     
-    public static void findNewCars(String url) {
+    public static ArrayList<Car> getNewCars(String url) {
         //code that gets executed repeatedly goes here
                 
         //create list of old IDs to compare and see if new cars appeared
@@ -101,7 +103,7 @@ public class martinBMW {
 
         cars = scrape(url);
 
-        //cars list is made, now everything is done locally (except for deepdives)
+        //cars list is made, now everything is done locally
         ArrayList<Car> newCars = new ArrayList<>();
         System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH SCAN%n", new Date());
         String progress = "Working ";
@@ -113,26 +115,11 @@ public class martinBMW {
             System.out.print(progress);
             if (!oldIds.contains(c.id)) {
                 //car is new
-
-                c.getRelevance();
                 newCars.add(c);
             }
         }
         println("");
-        if (!newCars.isEmpty()) {
-            //there are new cars! time to sort by relevance and email
-            System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), newCars.size());
-            newCars.sort(new PartsPresentComparator());
-            newCars.sort(new DistanceComparator());
-            newCars.sort(new RelevanceComparator());
-            //cars are now sorted (Relevance, distance, parts in common)
-
-            //email time
-            sendEmail(newCars, "rdelorenzo5@gmail.com");
-
-        } else {
-            System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n%n", new Date());
-        }
+        return newCars;
     }
     
     public static ArrayList<Car> scrape(String url) {
@@ -175,6 +162,14 @@ public class martinBMW {
         
         return toReturn;
         
+    }
+    
+    public static ArrayList<Car> sortList(ArrayList<Car> list) {
+        list.sort(new PartsPresentComparator());
+        list.sort(new DistanceComparator());
+        list.sort(new RelevanceComparator());
+        
+        return list;
     }
     
     public static String getEmailBody(ArrayList<Car> cars) {
@@ -245,43 +240,56 @@ public class martinBMW {
             return emailText;
     }
     
-    public static boolean sendEmail(ArrayList<Car> cars, String email) {
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from, "Martin"));
-            message.addRecipient(
-                    Message.RecipientType.TO,
-                    InternetAddress.parse(email)[0]
-                );
-            message.setSubject("New Arrivals at Pick-n-Pull! (" + cars.size() + ")");
+    public static boolean sendEmail(ArrayList<Car> cars, ArrayList<Part> parts, String email) {
+        if (!cars.isEmpty()) {
+            for (Car c : cars) c.calculateRelevance(parts);
+            //there are new cars! time to sort by relevance and email
+            System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), cars.size());
             
-            message.setContent(getEmailBody(cars), "text/html; charset=utf-8");
+            //cars are now sorted (Relevance, distance, parts in common)
+            cars = sortList(cars);
+            //email time
+            try {
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(from, "Martin"));
+                message.addRecipient(
+                        Message.RecipientType.TO,
+                        InternetAddress.parse(email)[0]
+                    );
+                message.setSubject("New Arrivals at Pick-n-Pull! (" + cars.size() + ")");
 
-            Transport.send(message);
-            return true;
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return false;
-        } catch (NoClassDefFoundError f) {
-            println("NoClassDef while trying to send email, probably an error with activation.jar");
-            return false;
+                message.setContent(getEmailBody(cars), "text/html; charset=utf-8");
+
+                Transport.send(message);
+                return true;
+            } catch (MessagingException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return false;
+            } catch (NoClassDefFoundError f) {
+                println("NoClassDef while trying to send email, probably an error with activation.jar");
+                return false;
+            }
+        } else {
+            System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n%n", new Date());
         }
+        return true;
     }
     
-    public static void getPartNumbers(String in) {
+    public static ArrayList<String> getPartNumbers(String in) {
+        ArrayList<String> pns = new ArrayList();
         try {
             URL url = new URL(in);
             BufferedReader read = new BufferedReader(
                 new InputStreamReader(url.openStream()));
             String i;
             while ((i = read.readLine()) != null)
-                partNumbers.add(i.split("\t")[0]);
+                pns.add(i.split("\t")[0]);
             read.close();
         } catch (IOException e) {
             println("Error reading parts file... Exiting");
             System.exit(10);
         }
-        
+        return pns;
     }
 
     public static void println(Object toPrint) {

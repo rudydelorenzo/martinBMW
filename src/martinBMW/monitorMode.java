@@ -1,6 +1,7 @@
 //Copyright © 2020 - Rudy de Lorenzo
 package martinBMW;
 
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -9,7 +10,7 @@ import javax.mail.Session;
 import static martinBMW.martinBMW.*;
 
 public class monitorMode {
-
+    
     public static void monitor() {
         //initialize email
         Properties prop = new Properties();
@@ -25,8 +26,7 @@ public class monitorMode {
                     }
                 });
         
-        
-        parts();
+        ArrayList<Part> parts = getParts();
         
         //begin pick n pull data collection
         String zip = "T5K2K3";
@@ -42,7 +42,8 @@ public class monitorMode {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                findNewCars(URL);
+                ArrayList<Car> newCars = getNewCars(URL);
+                sendEmail(newCars, parts, "rdelorenzo5@gmail.com");
             }
         }, delay*1000, period*1000);
     }
