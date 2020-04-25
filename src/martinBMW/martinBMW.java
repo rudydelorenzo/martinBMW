@@ -25,7 +25,7 @@ import org.jsoup.select.Elements;
 
 public class martinBMW {
     
-    private static final String VERSION = "1.0.7";
+    private static final String VERSION = "1.1.0b";
     
     public static String URL;
     
@@ -52,7 +52,7 @@ public class martinBMW {
         } catch (ArrayIndexOutOfBoundsException e) {
             mode = "-h";
         }
-        mode = "-m";
+
         String helpMessage = "";
         
         //launch appropriate tool
