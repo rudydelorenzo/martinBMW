@@ -1,9 +1,9 @@
 //Copyright © 2020 - Rudy de Lorenzo
 
-package picknpullscraper;
+package martinBMW;
 
 import java.util.Comparator;
-import static picknpullscraper.PicknpullScraper.distances;
+import static martinBMW.martinBMW.distances;
 
 
 public class DistanceComparator implements Comparator<Car>{

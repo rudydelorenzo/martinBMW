@@ -1,6 +1,6 @@
 //Copyright © 2020 - Rodrigo de Lorenzo
 
-package picknpullscraper;
+package martinBMW;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class PicknpullScraper {
+public class martinBMW {
     
     private static final String VERSION = "1.0.7";
     

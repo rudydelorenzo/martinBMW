@@ -1,17 +1,17 @@
 //Copyright © 2020 - Rudy de Lorenzo
 
-package picknpullscraper;
+package martinBMW;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import static picknpullscraper.PicknpullScraper.println;
+import static martinBMW.martinBMW.println;
 import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import static picknpullscraper.PicknpullScraper.parts;
+import static martinBMW.martinBMW.parts;
 
 public class Car {
     

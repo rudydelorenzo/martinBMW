@@ -1,6 +1,6 @@
 //Copyright © 2020 - Rudy de Lorenzo
 
-package picknpullscraper;
+package martinBMW;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import static picknpullscraper.PicknpullScraper.println;
+import static martinBMW.martinBMW.println;
 
 
 public class Part {
