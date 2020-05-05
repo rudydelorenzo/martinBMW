@@ -30,7 +30,7 @@ public class Part {
             try {
                 price = Float.parseFloat(content.select(">dl dd").last().text().replace("$", ""));
             } catch (NumberFormatException e) {
-                //println("Number Format Exception, no price available for PN:" + partNumber);
+                //TODO: Couldn't get price for part. Maybe set a flag and print an asterisk next to price?
             }
             
             Elements results = content.select("div.partSearchResults ul li a");

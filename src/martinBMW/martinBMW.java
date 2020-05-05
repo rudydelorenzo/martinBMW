@@ -77,12 +77,30 @@ public class martinBMW {
         
     }
     
-    public ArrayList<Part> getParts(String partsURL) {
+    public String getTextFromURL(String partsURL) {
+        String text = "";
+        try {
+            URL url = new URL(partsURL);
+            BufferedReader read = new BufferedReader(
+                new InputStreamReader(url.openStream()));
+            String i;
+            while ((i = read.readLine()) != null)
+                text += (i + "\n");
+            read.close();
+        } catch (IOException e) {
+            println("Error reading parts file... Exiting");
+            System.exit(10);
+        }
+        
+        return text;
+    }
+    
+    public ArrayList<Part> getParts(String partsText) {
         println("--------------------------------------PARTS-------------------------------------");
         System.out.print("Gathering information...");
         //work out part information and add parts to parts list
         
-        ArrayList<String> partNumbers = getPartNumbers(partsURL);
+        ArrayList<String> partNumbers = getPartNumbers(partsText);
         
         ArrayList<Part> parts = new ArrayList<>();
         for (String pn : partNumbers) parts.add(new Part(pn));
@@ -91,6 +109,19 @@ public class martinBMW {
         for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
         
         return parts;
+    }
+    
+    
+    public  ArrayList<String> getPartNumbers(String partsText) {
+        ArrayList<String> pns = new ArrayList();
+        String lines[] = partsText.split("\n");
+        
+        for (String line : lines) {
+            String pn = line.split("\t")[0];
+            if (!pn.equals("")) pns.add(pn);
+        }
+        
+        return pns;
     }
     
     public ArrayList<Car> getNewCars(String url) throws CouldNotConnectException {
@@ -273,23 +304,6 @@ public class martinBMW {
             System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n%n", new Date());
         }
         return true;
-    }
-    
-    public  ArrayList<String> getPartNumbers(String in) {
-        ArrayList<String> pns = new ArrayList();
-        try {
-            URL url = new URL(in);
-            BufferedReader read = new BufferedReader(
-                new InputStreamReader(url.openStream()));
-            String i;
-            while ((i = read.readLine()) != null)
-                pns.add(i.split("\t")[0]);
-            read.close();
-        } catch (IOException e) {
-            println("Error reading parts file... Exiting");
-            System.exit(10);
-        }
-        return pns;
     }
 
     public void println(Object toPrint) {

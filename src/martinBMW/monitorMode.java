@@ -26,7 +26,7 @@ public class monitorMode {
                     }
                 });
         
-        ArrayList<Part> parts = m.getParts("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/raw");
+        ArrayList<Part> parts = m.getParts(m.getTextFromURL("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/raw"));
         
         //begin pick n pull data collection
         String zip = "T5K2K3";
