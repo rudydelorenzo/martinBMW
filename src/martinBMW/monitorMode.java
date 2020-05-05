@@ -7,11 +7,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
-import static martinBMW.martinBMW.*;
 
 public class monitorMode {
     
-    public static void monitor() {
+    public void monitor() {
         //initialize email
         Properties prop = new Properties();
         prop.put("mail.smtp.host", "smtp.gmail.com");
@@ -19,20 +18,21 @@ public class monitorMode {
         prop.put("mail.smtp.auth", "true");
         prop.put("mail.smtp.starttls.enable", "true"); //TLS
         
-        session = Session.getInstance(prop,
+        martinBMW m = new martinBMW();
+        m.session = Session.getInstance(prop,
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(USERNAME, PASSWORD);
+                        return new PasswordAuthentication(m.USERNAME, m.PASSWORD);
                     }
                 });
         
-        ArrayList<Part> parts = getParts();
+        ArrayList<Part> parts = m.getParts("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/raw");
         
         //begin pick n pull data collection
         String zip = "T5K2K3";
         int distance = 500;
-        URL = String.format("https://www.picknpull.com/check_inventory.aspx?Zip=%s&Make=90&Model=&Year=&Distance=%d", zip, distance);
-        println("\n------------------------------------SEARCH--------------------------------------");
+        m.URL = String.format("https://www.picknpull.com/check_inventory.aspx?Zip=%s&Make=90&Model=&Year=&Distance=%d", zip, distance);
+        m.println("\n------------------------------------SEARCH--------------------------------------");
         
         if (true);
         int delay = 0;   // delay for 0 sec.
@@ -42,8 +42,13 @@ public class monitorMode {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                ArrayList<Car> newCars = getNewCars(URL);
-                sendEmail(newCars, parts, "rdelorenzo5@gmail.com");
+                try {
+                    ArrayList<Car> newCars = m.getNewCars(m.URL);
+                    m.sendEmail(newCars, parts, "E39", "rdelorenzo5@gmail.com");
+                } catch (CouldNotConnectException e) {
+                    System.out.println("ERROR: Could not establish connection to Pick n' Pull,\n"
+                            + "\tNo results will be provided for this search cycle...");
+                }
             }
         }, delay*1000, period*1000);
     }

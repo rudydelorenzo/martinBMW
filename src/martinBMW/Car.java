@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import static martinBMW.martinBMW.println;
+import martinBMW.martinBMW;
 import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -98,14 +98,14 @@ public class Car {
         return gen;
     }
     
-    public int calculateRelevance(ArrayList<Part> parts) {
+    public int calculateRelevance(ArrayList<Part> parts, String desiredGeneration) {
         if (relevance == -1) {
             //if we enter here, relevance hasn't been calculated yet
             relevance = Relevance.NONE;
             if (!generation.equals("UNK")) {
                 try {
                     deepDive();
-                    if (generation.equals("E39")) {
+                    if (generation.equals(desiredGeneration)) {
                         relevance = Relevance.IDENTICAL;
                     } else {
                         for (Part p : parts) {
@@ -157,7 +157,7 @@ public class Car {
     
     @Override
     public String toString() {
-        return String.format("%d %s %s (%s)", year, make, model, generation);
+        return String.format("%d %s %s\t(%s)", year, make, model, generation);
     }
     
 }

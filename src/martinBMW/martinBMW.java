@@ -1,5 +1,4 @@
 //Copyright © 2020 - Rodrigo de Lorenzo
-
 package martinBMW;
 
 import java.io.BufferedReader;
@@ -25,20 +24,20 @@ import org.jsoup.select.Elements;
 
 public class martinBMW {
     
-    private static final String VERSION = "1.1.0b";
+    private static final String VERSION = "1.1.0";
     
-    public static String URL;
+    public String URL;
     
-    public static ArrayList<Car> cars = new ArrayList<>();
-    public static ArrayList<Integer> oldIds = new ArrayList<>();
+    public ArrayList<Car> cars = new ArrayList<>();
+    public ArrayList<Integer> oldIds = new ArrayList<>();
     public static LinkedHashMap<String, Float> distances = new LinkedHashMap<>(); //distances by postal code
     
     //email variables
     //email stuff
-    public static String from = "picknpullnotify@gmail.com";
-    public static final String USERNAME = "picknpullnotify@gmail.com";
-    public static final String PASSWORD = "picknpullrocks";
-    public static Session session;
+    public String from = "picknpullnotify@gmail.com";
+    public final String USERNAME = "picknpullnotify@gmail.com";
+    public final String PASSWORD = "picknpullrocks";
+    public Session session;
     
     public static void main(String[] args) throws IOException {
         //print out program info
@@ -53,7 +52,7 @@ public class martinBMW {
         mode = "-m";
         String helpMessage = "Welcome to Martin for BMW!\n"
                 + "Here are the supported flags:\n"
-                + "\t\"-m\"\tlaunches martin in monitoring mode (to find new cars).\n"
+                + "\t\"-m\"\tlaunches martin in monitoring mode (perma-search).\n"
                 + "\t\"-s\"\tlaunches marin in single-search mode.\n"
                 + "\t\"-h\"\tshows supported flags.\n";
         
@@ -63,7 +62,9 @@ public class martinBMW {
                 System.out.println(helpMessage);
                 break;
             case "-m":
-                monitorMode.monitor();
+                monitorMode m = new monitorMode();
+                m.monitor();
+                System.out.println("");
                 break;
             case "-s":
                 //martinServer.startServer();
@@ -76,12 +77,12 @@ public class martinBMW {
         
     }
     
-    public static ArrayList<Part> getParts() {
+    public ArrayList<Part> getParts(String partsURL) {
         println("--------------------------------------PARTS-------------------------------------");
         System.out.print("Gathering information...");
         //work out part information and add parts to parts list
         
-        ArrayList<String> partNumbers = getPartNumbers("https://gist.githubusercontent.com/rudydelorenzo/33e8db417e81232e7f12c4ed5e639b83/raw");
+        ArrayList<String> partNumbers = getPartNumbers(partsURL);
         
         ArrayList<Part> parts = new ArrayList<>();
         for (String pn : partNumbers) parts.add(new Part(pn));
@@ -92,7 +93,7 @@ public class martinBMW {
         return parts;
     }
     
-    public static ArrayList<Car> getNewCars(String url) {
+    public ArrayList<Car> getNewCars(String url) throws CouldNotConnectException {
         //code that gets executed repeatedly goes here
                 
         //create list of old IDs to compare and see if new cars appeared
@@ -100,19 +101,18 @@ public class martinBMW {
         for (Car c : cars) {
             oldIds.add(c.id);
         }
-
-        cars = scrape(url);
+        
+        try {
+            cars = scrape(url);
+        } catch (CouldNotConnectException e) {
+            throw e;
+        }
 
         //cars list is made, now everything is done locally
         ArrayList<Car> newCars = new ArrayList<>();
-        System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH SCAN%n", new Date());
-        String progress = "Working ";
-        System.out.print(progress);
+
         for (Car c : cars) {
             //System.out.printf("%s: %d %s %s, VIN:%s \tAdded on: %tB %<te, %<tY%n", c.generation, c.year, c.make, c.model, c.vin, c.date);
-            for (int i =0 ; i < progress.length(); i++) System.out.print("\b");
-            progress += ".";
-            System.out.print(progress);
             if (!oldIds.contains(c.id)) {
                 //car is new
                 newCars.add(c);
@@ -122,9 +122,9 @@ public class martinBMW {
         return newCars;
     }
     
-    public static ArrayList<Car> scrape(String url) {
+    public ArrayList<Car> scrape(String url) throws CouldNotConnectException {
         ArrayList<Car> toReturn = new ArrayList<>();
-        try{
+        try {
             Document page = Jsoup.connect(url).get();
 
             Element pageContent = page.getElementById("page-content-wrapper");
@@ -156,15 +156,14 @@ public class martinBMW {
                 }
             }
         } catch (IOException e) {
-            println("ERROR: Could not establish connection to site, exiting...");
-            System.exit(10);
+            throw new CouldNotConnectException();
         }
         
         return toReturn;
         
     }
     
-    public static ArrayList<Car> sortList(ArrayList<Car> list) {
+    public ArrayList<Car> sortList(ArrayList<Car> list) {
         list.sort(new PartsPresentComparator());
         list.sort(new DistanceComparator());
         list.sort(new RelevanceComparator());
@@ -172,7 +171,7 @@ public class martinBMW {
         return list;
     }
     
-    public static String getEmailBody(ArrayList<Car> cars) {
+    public String getEmailBody(ArrayList<Car> cars) {
         //divide list into relevance categories
             LinkedHashMap<Integer, ArrayList<Car>> lhm = new LinkedHashMap<>();
             for (Car c : cars) {
@@ -240,9 +239,10 @@ public class martinBMW {
             return emailText;
     }
     
-    public static boolean sendEmail(ArrayList<Car> cars, ArrayList<Part> parts, String email) {
+    public boolean sendEmail(ArrayList<Car> cars, ArrayList<Part> parts, String desiredGeneration, String email) {
         if (!cars.isEmpty()) {
-            for (Car c : cars) c.calculateRelevance(parts);
+            System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH SCAN%n", new Date());
+            for (Car c : cars) c.calculateRelevance(parts, desiredGeneration);
             //there are new cars! time to sort by relevance and email
             System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), cars.size());
             
@@ -275,7 +275,7 @@ public class martinBMW {
         return true;
     }
     
-    public static ArrayList<String> getPartNumbers(String in) {
+    public  ArrayList<String> getPartNumbers(String in) {
         ArrayList<String> pns = new ArrayList();
         try {
             URL url = new URL(in);
@@ -292,7 +292,7 @@ public class martinBMW {
         return pns;
     }
 
-    public static void println(Object toPrint) {
+    public void println(Object toPrint) {
         System.out.println(toPrint);
     }
     
