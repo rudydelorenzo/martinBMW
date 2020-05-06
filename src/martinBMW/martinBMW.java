@@ -24,13 +24,13 @@ import org.jsoup.select.Elements;
 
 public class martinBMW {
     
-    private static final String VERSION = "1.1.0";
+    private static final String VERSION = "1.1.1";
     
     public String URL;
     
     public ArrayList<Car> cars = new ArrayList<>();
     public ArrayList<Integer> oldIds = new ArrayList<>();
-    public static LinkedHashMap<String, Float> distances = new LinkedHashMap<>(); //distances by postal code
+    public LinkedHashMap<String, Float> distances = new LinkedHashMap<>(); //distances by postal code
     
     //email variables
     //email stuff
@@ -196,7 +196,7 @@ public class martinBMW {
     
     public ArrayList<Car> sortList(ArrayList<Car> list) {
         list.sort(new PartsPresentComparator());
-        list.sort(new DistanceComparator());
+        list.sort(new DistanceComparator(distances));
         list.sort(new RelevanceComparator());
         
         return list;
