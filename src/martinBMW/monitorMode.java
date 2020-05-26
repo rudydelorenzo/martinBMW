@@ -45,7 +45,6 @@ public class monitorMode {
                 try {
                     ArrayList<Car> newCars = m.getNewCars(m.URL);
                     m.sendEmail(newCars, parts, "E39", "rdelorenzo5@gmail.com");
-                    System.out.println(newCars.get(0).imageURL);
                 } catch (CouldNotConnectException e) {
                     System.out.println("ERROR: Could not establish connection to Pick n' Pull,\n"
                             + "\tNo results will be provided for this search cycle...");

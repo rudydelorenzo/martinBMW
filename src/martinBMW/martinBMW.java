@@ -24,7 +24,7 @@ import org.jsoup.select.Elements;
 
 public class martinBMW {
     
-    private static final String VERSION = "1.2.0";
+    private static final String VERSION = "1.2.1";
     
     public String URL;
     public static String vinDecoderURL = "http://bmwfans.info/vin/decoder?vin=";

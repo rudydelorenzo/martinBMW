@@ -74,7 +74,6 @@ public class Car {
             Document page = Jsoup.connect(martinBMW.vinDecoderURL + vin.substring(10)).get();
             Elements rows = page.getElementsByTag("table").first().getElementsByTag("tr");
             for (Element row : rows) {
-                System.out.println(row);
                 if (row.children().get(0).text().equalsIgnoreCase("series")) {
                     String[] modelSplit = row.children().get(1).text().split(" ");
                     for (String bit : modelSplit) {
