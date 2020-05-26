@@ -24,16 +24,16 @@ import org.jsoup.select.Elements;
 
 public class martinBMW {
     
-    private static final String VERSION = "1.1.1";
+    private static final String VERSION = "1.2.0";
     
     public String URL;
+    public static String vinDecoderURL = "http://bmwfans.info/vin/decoder?vin=";
     
     public ArrayList<Car> cars = new ArrayList<>();
     public ArrayList<Integer> oldIds = new ArrayList<>();
     public LinkedHashMap<String, Float> distances = new LinkedHashMap<>(); //distances by postal code
     
     //email variables
-    //email stuff
     public String from = "picknpullnotify@gmail.com";
     public final String USERNAME = "picknpullnotify@gmail.com";
     public final String PASSWORD = "picknpullrocks";

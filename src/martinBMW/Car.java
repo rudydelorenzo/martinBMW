@@ -38,7 +38,7 @@ public class Car {
                     + "passed into new Car() function.");
         }
         
-        //println(dataString);
+        //System.out.println(dataString);
         
         //decompose string and put into dictionary
         String[] pairs = dataString.split(",");
@@ -61,8 +61,8 @@ public class Car {
         year = Integer.parseInt(data.get("Year"));
         make = data.get("Make");
         model = data.get("Model");
-        generation = solveGeneration();
         vin = data.get("VIN");
+        generation = solveGeneration();
         carURL = "https://www.picknpull.com/vehicle_details.aspx?VIN=" + vin;
         imageURL = data.get("ThumbNail");
     }
@@ -70,28 +70,47 @@ public class Car {
     private String solveGeneration() {
         String gen = "UNK";
         
-        if (model.equalsIgnoreCase("5-Series") || model.equalsIgnoreCase("M5")) {
-            if (1988 < year && year < 1996) gen = "E34";
-            else if (1995 < year && year < 2004) gen = "E39";
-            else if (2003 < year && year < 2011) gen = "E60";
-        } else if (model.equalsIgnoreCase("3-Series")) {
-            if (1991 < year && year < 1998) gen = "E36";
-            else if (1997 < year && year < 2006) gen = "E46";
-        } else if (model.equalsIgnoreCase("7-Series")) {
-            if (1993 < year && year < 2002) gen = "E38";
-            else if (2001 < year && year < 2006) gen = "E65";
-        } else if (model.equalsIgnoreCase("8-Series")) {
-            if (1988 < year && year < 2000) gen = "E31";
-        } else if (model.equalsIgnoreCase("X5")) {
-            if (1999 <= year && year < 2006) gen = "E53";
-        } else if (model.equalsIgnoreCase("X3")) {
-            if (2003 < year && year < 2011) gen = "E83";
-        } else if (model.equalsIgnoreCase("Z3")) {
-            if (1995 < year && year < 2003) gen = "E36";
-        } else if (model.equalsIgnoreCase("Z4")) {
-            if (2001 < year && year < 2006) gen = "E85";
-        } else if (model.equalsIgnoreCase("Z8")) {
-            if (1997 < year && year < 2004) gen = "E52";
+        try {
+            Document page = Jsoup.connect(martinBMW.vinDecoderURL + vin.substring(10)).get();
+            Elements rows = page.getElementsByTag("table").first().getElementsByTag("tr");
+            for (Element row : rows) {
+                System.out.println(row);
+                if (row.children().get(0).text().equalsIgnoreCase("series")) {
+                    String[] modelSplit = row.children().get(1).text().split(" ");
+                    for (String bit : modelSplit) {
+                        if (bit.startsWith("E") || bit.startsWith("F") || bit.startsWith("G")) gen = bit;
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Could not get generation for VIN " + vin + " online, "
+                    + "using fallback method instead...\n"
+                    + "ERROR: ");
+            e.printStackTrace();
+            if (model.equalsIgnoreCase("5-Series") || model.equalsIgnoreCase("M5")) {
+                if (1988 < year && year < 1996) gen = "E34";
+                else if (1996 <= year && year <= 2003) gen = "E39";
+                else if (2003 < year && year < 2011) gen = "E60";
+            } else if (model.equalsIgnoreCase("3-Series")) {
+                if (1991 < year && year < 1998) gen = "E36";
+                else if (1997 < year && year < 2006) gen = "E46";
+            } else if (model.equalsIgnoreCase("7-Series")) {
+                if (1993 < year && year < 2002) gen = "E38";
+                else if (2001 < year && year < 2006) gen = "E65";
+            } else if (model.equalsIgnoreCase("8-Series")) {
+                if (1988 < year && year < 2000) gen = "E31";
+            } else if (model.equalsIgnoreCase("X5")) {
+                if (1999 <= year && year < 2006) gen = "E53";
+            } else if (model.equalsIgnoreCase("X3")) {
+                if (2003 < year && year < 2011) gen = "E83";
+            } else if (model.equalsIgnoreCase("Z3")) {
+                if (1995 < year && year < 2003) gen = "E36";
+            } else if (model.equalsIgnoreCase("Z4")) {
+                if (2001 < year && year < 2006) gen = "E85";
+            } else if (model.equalsIgnoreCase("Z8")) {
+                if (1997 < year && year < 2004) gen = "E52";
+            }
         }
         
         return gen;
@@ -129,6 +148,10 @@ public class Car {
     
     private void deepDive() throws IOException {
         Document page = Jsoup.connect(carURL).get();
+        
+        Element largeImageDiv = page.getElementById("ctl00_ctl00_MasterHolder_MainContent_largeImageDiv");
+        Element image = largeImageDiv.getElementsByTag("img").first();
+        imageURL = image.attr("src");
         
         Element dataTable = page.getElementById("ctl00_ctl00_MasterHolder_MainContent_infoTextBlock");
         Elements rows = dataTable.select("div.dataRow, div.altDataRow");
