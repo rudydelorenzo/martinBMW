@@ -30,6 +30,7 @@ public class Car {
     public int relevance = -1;
     public ArrayList<Part> contains = new ArrayList<>();
     public String thumbnailURL;
+    public boolean upright = true;
     public String imageURL;
     
     public Car(String dataString) {
@@ -65,7 +66,7 @@ public class Car {
         vin = data.get("VIN");
         generation = solveGeneration();
         carURL = "https://www.picknpull.com/vehicle_details.aspx?VIN=" + vin;
-        //get thumbnail url
+        //get thumbnail url, then check orientation and set rotation flag
         thumbnailURL = dataString.substring(dataString.indexOf("ThumbNail")+12, 
                 dataString.indexOf("\"", dataString.indexOf("ThumbNail")+12));
     }
