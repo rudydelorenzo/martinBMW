@@ -29,6 +29,7 @@ public class Car {
     public String vin;
     public int relevance = -1;
     public ArrayList<Part> contains = new ArrayList<>();
+    public String thumbnailURL;
     public String imageURL;
     
     public Car(String dataString) {
@@ -64,7 +65,9 @@ public class Car {
         vin = data.get("VIN");
         generation = solveGeneration();
         carURL = "https://www.picknpull.com/vehicle_details.aspx?VIN=" + vin;
-        imageURL = data.get("ThumbNail");
+        //get thumbnail url
+        thumbnailURL = dataString.substring(dataString.indexOf("ThumbNail")+12, 
+                dataString.indexOf("\"", dataString.indexOf("ThumbNail")+12));
     }
     
     private String solveGeneration() {
