@@ -34,7 +34,6 @@ public class monitorMode {
         m.URL = String.format("https://www.picknpull.com/check_inventory.aspx?Zip=%s&Make=90&Model=&Year=&Distance=%d", zip, distance);
         m.println("\n------------------------------------SEARCH--------------------------------------");
         
-        if (true);
         int delay = 0;   // delay for 0 sec.
         int period = 600;  // repeat every 10 min (600sec).
         Timer timer = new Timer();
