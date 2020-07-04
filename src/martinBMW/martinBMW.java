@@ -24,7 +24,7 @@ import org.jsoup.select.Elements;
 
 public class martinBMW {
     
-    private static final String VERSION = "1.2.1";
+    private static final String VERSION = "1.3.0";
     
     public String URL;
     public static String vinDecoderURL = "http://bmwfans.info/vin/decoder?vin=";
@@ -88,8 +88,7 @@ public class martinBMW {
                 text += (i + "\n");
             read.close();
         } catch (IOException e) {
-            println("Error reading parts file... Exiting");
-            System.exit(10);
+            println("Error reading parts file.");
         }
         
         return text;
@@ -97,16 +96,29 @@ public class martinBMW {
     
     public ArrayList<Part> getParts(String partsText) {
         println("--------------------------------------PARTS-------------------------------------");
-        System.out.print("Gathering information...");
-        //work out part information and add parts to parts list
-        
-        ArrayList<String> partNumbers = getPartNumbers(partsText);
-        
         ArrayList<Part> parts = new ArrayList<>();
-        for (String pn : partNumbers) parts.add(new Part(pn));
         
-        System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
-        for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
+        if (!partsText.equals("")) {
+            Character firstChar = partsText.charAt(0);
+            boolean firstCharIsNumber = firstChar.toString().matches("\\d+");
+            if (firstCharIsNumber) {
+                System.out.print("Gathering information...");
+                //work out part information and add parts to parts list
+
+                ArrayList<String> partNumbers = getPartNumbers(partsText);
+
+                for (String pn : partNumbers) parts.add(new Part(pn));
+
+                System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+                for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
+
+            } else {
+                //most likely an invalid parts list, parts List will be returned empty
+                System.out.println("ERROR: Invalid partslist supplied.");
+            }
+        } else {
+            System.out.println("ERROE: partsText empty, parts list will therefore contain no items...");
+        }
         
         return parts;
     }
