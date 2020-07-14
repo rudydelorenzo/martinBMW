@@ -173,6 +173,12 @@ public class martinBMW {
             Element pageContent = page.getElementById("page-content-wrapper");
             Element resultsDiv = pageContent.getElementById("ctl00_ctl00_MasterHolder_MainContent_resultsDiv");
 
+            //check that there weren't any validation errors
+            if (resultsDiv == null) {
+                //return empty list
+                return toReturn;
+            }
+            
             //grab location info
             Elements locations = resultsDiv.select("div.location-distance");
             Elements postalCodes = resultsDiv.select("div.store-info");
