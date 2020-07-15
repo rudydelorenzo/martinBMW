@@ -24,7 +24,7 @@ import org.jsoup.select.Elements;
 
 public class martinBMW {
     
-    private static final String VERSION = "1.3.0";
+    private static final String VERSION = "1.4.0";
     
     public String URL;
     public static String vinDecoderURL = "http://bmwfans.info/vin/decoder?vin=";
@@ -106,8 +106,19 @@ public class martinBMW {
                 //work out part information and add parts to parts list
 
                 ArrayList<String> partNumbers = getPartNumbers(partsText);
+                ArrayList<Thread> threads = new ArrayList();
 
-                for (String pn : partNumbers) parts.add(new Part(pn));
+                for (String pn : partNumbers) {
+                    Thread t = new Thread() {
+                        public void run(){
+                            parts.add(new Part(pn));
+                        }
+                    };
+                    t.start();
+                    threads.add(t);
+                }
+                
+                while (threadsRunning(threads)) {}
 
                 System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
                 for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
@@ -121,6 +132,18 @@ public class martinBMW {
         }
         
         return parts;
+    }
+    
+    public boolean threadsRunning(ArrayList<Thread> a) {
+        boolean ret = false;
+        
+        for (Thread t : a) {
+            if (t.isAlive()) {
+                ret = true;
+            }
+        }
+        
+        return ret;
     }
     
     
@@ -200,9 +223,23 @@ public class martinBMW {
                 String scriptText = script.toString();
                 String locationData = scriptText.substring(scriptText.indexOf("[")+2, scriptText.indexOf("]")-1);
                 String[] carData = locationData.split("\\},\\{");
+                
+                ArrayList<Thread> threads = new ArrayList();
+                
                 for (String data : carData) {
-                    toReturn.add(new Car(data));
+                    Thread t = new Thread() {
+                        public void run(){
+                            toReturn.add(new Car(data));
+                        }
+                    };
+                    
+                    t.start();
+                    threads.add(t);
+
                 }
+                
+                while (threadsRunning(threads)) {}
+                
             }
         } catch (IOException e) {
             throw new CouldNotConnectException();
@@ -291,7 +328,23 @@ public class martinBMW {
     public boolean sendEmail(ArrayList<Car> cars, ArrayList<Part> parts, String desiredGeneration, String email) {
         if (!cars.isEmpty()) {
             System.out.printf("(%tH:%<tM:%<tS) STARTING IN-DEPTH SCAN%n", new Date());
-            for (Car c : cars) c.calculateRelevance(parts, desiredGeneration);
+            
+            ArrayList<Thread> threads = new ArrayList();
+            
+            for (Car c : cars) {
+                Thread t = new Thread() {
+                    public void run() {
+                        c.calculateRelevance(parts, desiredGeneration);
+                    }
+                };
+                
+                t.start();
+                threads.add(t);
+                
+            }
+            
+            while (threadsRunning(threads)) {}
+            
             //there are new cars! time to sort by relevance and email
             System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), cars.size());
             
