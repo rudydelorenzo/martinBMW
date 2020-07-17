@@ -8,6 +8,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -106,19 +109,21 @@ public class martinBMW {
                 //work out part information and add parts to parts list
 
                 ArrayList<String> partNumbers = getPartNumbers(partsText);
-                ArrayList<Thread> threads = new ArrayList();
 
+                ThreadPoolExecutor es = (ThreadPoolExecutor)Executors.newFixedThreadPool(20);
                 for (String pn : partNumbers) {
-                    Thread t = new Thread() {
-                        public void run(){
+                    es.execute(new Runnable() {
+                        public void run() {
                             parts.add(new Part(pn));
                         }
-                    };
-                    t.start();
-                    threads.add(t);
+                    });
+
                 }
+                es.shutdown();
                 
-                while (threadsRunning(threads)) {}
+                try {
+                    boolean finished = es.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
+                } catch (InterruptedException e) {}
 
                 System.out.print("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
                 for (Part p : parts) System.out.printf("Part Number: %s \t%-36s\t$%7.2f%n", p.partNumber, p.partName, p.price);
@@ -134,16 +139,16 @@ public class martinBMW {
         return parts;
     }
     
-    public boolean threadsRunning(ArrayList<Thread> a) {
-        boolean ret = false;
+    public int threadsRunning(ArrayList<Thread> a) {
+        int running = 0;
         
         for (Thread t : a) {
             if (t.isAlive()) {
-                ret = true;
+                running++;
             }
         }
         
-        return ret;
+        return running;
     }
     
     
@@ -179,9 +184,14 @@ public class martinBMW {
 
         for (Car c : cars) {
             //System.out.printf("%s: %d %s %s, VIN:%s \tAdded on: %tB %<te, %<tY%n", c.generation, c.year, c.make, c.model, c.vin, c.date);
-            if (!oldIds.contains(c.id)) {
-                //car is new
-                newCars.add(c);
+            try {
+                if (!oldIds.contains(c.id)) {
+                    //car is new
+                    newCars.add(c);
+                }
+            } catch (NullPointerException e) {
+                System.out.printf("NullPointerException getting ID%n");
+                System.out.printf("Is current car == null: %b%n", c == null);
             }
         }
         println("");
@@ -224,21 +234,20 @@ public class martinBMW {
                 String locationData = scriptText.substring(scriptText.indexOf("[")+2, scriptText.indexOf("]")-1);
                 String[] carData = locationData.split("\\},\\{");
                 
-                ArrayList<Thread> threads = new ArrayList();
-                
+                ThreadPoolExecutor es = (ThreadPoolExecutor)Executors.newFixedThreadPool(20);
                 for (String data : carData) {
-                    Thread t = new Thread() {
-                        public void run(){
+                    es.execute(new Runnable() {
+                        public void run() {
                             toReturn.add(new Car(data));
                         }
-                    };
-                    
-                    t.start();
-                    threads.add(t);
+                    });
 
                 }
+                es.shutdown();
                 
-                while (threadsRunning(threads)) {}
+                try {
+                    boolean finished = es.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
+                } catch (InterruptedException e) {}
                 
             }
         } catch (IOException e) {
@@ -343,12 +352,13 @@ public class martinBMW {
                 
             }
             
-            while (threadsRunning(threads)) {}
+            while (threadsRunning(threads) != 0) {}
             
             //there are new cars! time to sort by relevance and email
             System.out.printf("(%tH:%<tM:%<tS) THERE ARE %d NEW CARS!%n%n", new Date(), cars.size());
             
             //cars are now sorted (Relevance, distance, parts in common)
+            cars = cleanList(cars);
             cars = sortList(cars);
             //email time
             try {
@@ -375,6 +385,19 @@ public class martinBMW {
             System.out.printf("(%tH:%<tM:%<tS) THERE ARE NO NEW CARS!%n%n", new Date());
         }
         return true;
+    }
+    
+    public ArrayList<Car> cleanList(ArrayList<Car> a) {
+        for (int i = 0; i < a.size(); i++) {
+            Car c = a.get(i);
+            //test#1: is the post code valid
+            if (distances.get(c.postCode) == null) {
+                a.remove(c);
+                System.out.println("REMOVED CAR VIN " + c.vin);
+                i--;
+            }
+        }
+        return a;
     }
 
     public void println(Object toPrint) {

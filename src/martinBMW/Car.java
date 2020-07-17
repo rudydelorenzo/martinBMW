@@ -86,6 +86,7 @@ public class Car {
                     break;
                 }
             }
+            page = null;
         } catch (Exception e) {
             System.out.println("Could not get generation for VIN " + vin + " online, "
                     + "using fallback method instead...\n"
@@ -168,6 +169,8 @@ public class Car {
         if (data.get("BarCodeNumber").equals("null")) data.replace("BarCodeNumber", rows.get(7).select("span.body-text").text());
         
         trim = data.get("Trim");
+        
+        page = null;
     }
     
     public String getPartsListHTML() {

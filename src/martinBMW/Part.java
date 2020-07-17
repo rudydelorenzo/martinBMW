@@ -20,6 +20,8 @@ public class Part {
     public Set<String> presentIn = new HashSet<>();
     
     public Part(String pn) {
+        pn = pn.replace("-", "");
+        pn = pn.replace(" ", "");
         partNumber = pn;
         String url = "https://www.realoem.com/bmw/enUS/partxref?q=" + partNumber;
         try {
