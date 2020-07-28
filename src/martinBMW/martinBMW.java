@@ -266,7 +266,7 @@ public class martinBMW {
         return list;
     }
     
-    public String getEmailBody(ArrayList<Car> cars) {
+    public String getTablesHTML(ArrayList<Car> cars) {
         //divide list into relevance categories
             LinkedHashMap<Integer, ArrayList<Car>> lhm = new LinkedHashMap<>();
             for (Car c : cars) {
@@ -278,14 +278,7 @@ public class martinBMW {
             }
             //println(lhm);
             
-            //creating email text
-            String emailText = "<html>\n" +
-                "<head>\n" +
-                "<style>\n" +
-                "table, th, td {border-collapse: collapse; border: 1px solid black;}\n" +
-                "</style>\n" +
-                "</head>\n" +
-                "<body><h1>ARRIVALS</h1>\n";
+            String tableHTML = "";
             //make sections (headers + tables)
             for (Map.Entry<Integer, ArrayList<Car>> entry : lhm.entrySet()) {
                 //make header
@@ -325,13 +318,13 @@ public class martinBMW {
                             String.format("<a href=\"%s\">%s</a>", c.carURL, c.vin), (currentLevel == Relevance.PARTIAL ? ("<td>Car may contain:" + c.getPartsListHTML() + "</td>"):""), 
                             c.locationName, c.row, c.dateAdded);
                 }
-                table += "</table>\n</body>\n</html>";
+                table += "</table>";
                 
-                emailText += sectionHeader;
-                emailText += table;
+                tableHTML += sectionHeader;
+                tableHTML += table;
             }
             
-            return emailText;
+            return tableHTML;
     }
     
     public boolean sendEmail(ArrayList<Car> cars, ArrayList<Part> parts, String desiredGeneration, String email) {
@@ -369,8 +362,20 @@ public class martinBMW {
                         InternetAddress.parse(email)[0]
                     );
                 message.setSubject("New Arrivals at Pick-n-Pull! (" + cars.size() + ")");
-
-                message.setContent(getEmailBody(cars), "text/html; charset=utf-8");
+                
+                String body = "<html>\n" +
+                "<head>\n" +
+                "<style>\n" +
+                "table, th, td {border-collapse: collapse; border: 1px solid black;}\n" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body><h1>ARRIVALS</h1>\n";
+                
+                body += getTablesHTML(cars);
+                
+                body += "\n</body>\n</html>";
+                
+                message.setContent(body, "text/html; charset=utf-8");
 
                 Transport.send(message);
                 return true;
