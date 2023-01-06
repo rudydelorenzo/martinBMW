@@ -12,3 +12,6 @@ Martin is part search aggregator and part search engine. It takes in a list of B
 * HTML parsing + scraping
 * SMTP Mailing
 * GitHub Releases + VCS
+
+## martinServer
+There exists an add-on project to this one called [martinServer](https://github.com/rudydelorenzo/martinServer), which contains a Java Tomcat backend to host martin as a fully fledged webapp. 
