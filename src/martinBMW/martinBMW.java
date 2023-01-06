@@ -39,7 +39,7 @@ public class martinBMW {
     //email variables
     public String from = "picknpullnotify@gmail.com";
     public final String USERNAME = "picknpullnotify@gmail.com";
-    public final String PASSWORD = "picknpullrocks";
+    public final String PASSWORD = "GITHUB_API_SECRET";
     public Session session;
     
     public static void main(String[] args) throws IOException {
