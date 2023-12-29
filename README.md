@@ -15,4 +15,4 @@ Martin is part search aggregator and part search engine. It takes in a list of B
 * GitHub Secrets
 
 ## martinServer
-There exists an add-on project to this one called [martinServer](https://github.com/rudydelorenzo/martinServer), which contains a Java Tomcat backend to host martin as a fully fledged webapp. 
+There exists a companion project to this one called [martinServer](https://github.com/rudydelorenzo/martinServer), which contains a Java Tomcat backend to host martin as a fully fledged webapp. 
